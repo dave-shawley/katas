@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!-- vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab: -->
+<ivy-module version="2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+
+  <info module="logcontrol" organisation="name.shawley.dave" status="integration">
+  </info>
+  
+  <configurations>
+    <conf name="runtime"/>
+    <conf name="default" extends="runtime"/>
+    <conf name="development" extends="runtime"/>
+  </configurations>
+
+  <dependencies>
+    <dependency
+      org="org.junit" name="junit"
+      conf="development->default"
+      rev="[4.11,4.12)" revConstraint="latest.release"/>
+    <dependency
+      org="org.hamcrest" name="hamcrest-all"
+      conf="development->default"
+      rev="[1.3,1.4)" revConstraint="latest.release"/>
+    <dependency
+      org="net.sourceforge.cobertura" name="cobertura"
+      conf="development->default"
+      rev="[1.9,)" revConstraint="latest.release"/>
+  </dependencies>
+
+</ivy-module>

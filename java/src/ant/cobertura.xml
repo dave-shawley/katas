@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!-- vim: set filetype=ant tabstop=2 shiftwidth=2 expandtab: -->
+<project xmlns:cobertura="antlib:net.sourceforge.cobertura.ant">
+
+  <target name="-cobertura-properties" depends="-set-project-properties" extensionOf="set-properties">
+    <property name="coverage.dir" value="${build.dir}/cobertura"/>
+    <property name="coverage.data.dir" value="${coverage.dir}/data"/>
+    <property name="cobertura.instr.dir" value="${coverage.dir}/classes"/>
+    <property name="cobertura.serialization.file" value="${coverage.dir}/cobertura.ser"/>
+  </target>
+
+  <target name="install-cobertura" depends="ready-to-build">
+    <taskdef
+      uri="antlib:net.sourceforge.cobertura.ant"
+      classpathref="compile.classpath"
+      resource="net/sourceforge/cobertura/ant/antlib.xml"/>
+  </target>
+
+  <target name="instrument-with-cobertura" depends="compile, install-cobertura">
+    <delete file="${cobertura.serialization.file}"/>
+    <delete dir="${cobertura.instr.dir}"/>
+    <cobertura:instrument
+      todir="${cobertura.instr.dir}" datafile="${cobertura.serialization.file}">
+      <fileset dir="${main.classes.dir}" includes="**/*.class"/>
+    </cobertura:instrument>
+  </target>
+
+  <target name="run-tests-with-cobertura" depends="instrument-with-cobertura, ready-to-test">
+    <mkdir dir="${coverage.data.dir}"/>
+    <junit fork="yes" forkmode="once" showoutput="no" printsummary="no" failureproperty="tests.failed">
+      <formatter type="brief" usefile="no"/>
+      <classpath>
+        <pathelement location="${cobertura.instr.dir}"/>
+        <path refid="run.test.classpath"/>
+      </classpath>
+      <batchtest todir="${coverage.data.dir}">
+        <fileset dir="${test.classes.dir}" includes="**/*Test.class"/>
+        <fileset dir="${test.classes.dir}" includes="**/*Tests.class"/>
+      </batchtest>
+      <sysproperty
+        key="net.sourceforge.cobertura.datafile"
+        value="${cobertura.serialization.file}"/>
+    </junit>
+    <fail if="tests.failed">Unit tests have failed.</fail>
+  </target>
+
+  <target name="generate-cobertura-reports" depends="run-tests-with-cobertura" extensionOf="coverage">
+    <property name="coverage.report.dir" value="${output.dir}/reports/coverage"/>
+    <cobertura:report format="html"
+      srcdir="${main.src.dir}" destdir="${coverage.report.dir}"
+      datafile="${cobertura.serialization.file}"/>
+    <echo message="unit test coverage reports are located in ${coverage.report.dir}"/>
+  </target>
+
+  <target name="-remove-cobertura-objects" depends="set-properties" extensionOf="remove-intermediate">
+    <delete dir="${coverage.dir}" deleteonexit="yes"/>
+  </target>
+
+</project>

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<ivysettings>
+  <settings defaultResolver="internet"/>
+
+  <resolvers>
+    <chain name="internet">
+      <packager name="roundup" buildRoot="${ivy.home}/packager/build" resourceCache="${ivy.home}/packager/cache">
+        <ivy pattern="http://ivyroundup.googlecode.com/svn/trunk/repo/modules/[organisation]/[module]/[revision]/ivy.xml"/>
+        <artifact pattern="http://ivyroundup.googlecode.com/svn/trunk/repo/modules/[organisation]/[module]/[revision]/packager.xml"/>
+      </packager>
+      <url name="repo1.maven.org" m2compatible="true" namespace="maven-mapper">
+        <artifact pattern="http://repo1.maven.org/maven2/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+      </url>
+    </chain>
+  </resolvers>
+
+  <namespaces>
+    <namespace name="maven-mapper">
+      <rule>
+        <fromsystem>
+          <src org="org.(junit)"/>
+          <dest org="$o1"/>
+        </fromsystem>
+        <tosystem>
+          <src org="junit"/>
+          <dest org="org.$o0"/>
+        </tosystem>
+      </rule>
+      <rule>
+        <fromsystem>
+          <src org="org.apache.log4j"/>
+          <dest org="log4j"/>
+        </fromsystem>
+        <tosystem>
+          <src org="log4j"/>
+          <dest org="org.apache.log4j"/>
+        </tosystem>
+      </rule>
+    </namespace>
+  </namespaces>
+
+</ivysettings>

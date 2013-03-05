@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!-- vim: set filetype=ant tabstop=2 shiftwidth=2 expandtab: -->
+<project>
+
+  <target name="-eclipse-properties" depends="-set-project-properties" extensionOf="set-properties">
+    <property name="eclipse.tarball" value="${build.dir}/eclipse-task.tbz"/>
+    <condition property="eclipse.task.available">
+      <or>
+        <available classname="prantl.ant.eclipse.EclipseTask"/>
+        <available file="${eclipse.tarball}"/>
+      </or>
+    </condition>
+  </target>
+
+  <target name="-download-eclipse-task" depends="set-properties" unless="eclipse.task.available">
+    <mkdir dir="${build.lib.dir}"/>
+    <get
+      src="http://sourceforge.net/projects/ant-eclipse/files/latest/download?source=files"
+      dest="${eclipse.tarball}"
+      usetimestamp="yes"/>
+    <property name="eclipse.task.available" value="yes"/>
+  </target>
+
+  <target name="-install-eclipse-task" depends="-download-eclipse-task">
+    <bunzip2 src="${eclipse.tarball}" dest="${build.dir}/eclipse-task.tar"/>
+    <untar src="${build.dir}/eclipse-task.tar" dest="${build.lib.dir}">
+      <patternset includes="lib/**/*.*"/>
+      <mapper type="flatten"/>
+    </untar>
+    <delete file="${build.dir}/eclipse-task.tar"/>
+  </target>
+
+  <target name="eclipse" depends="-install-eclipse-task, ready-to-build"
+    description="generate an Eclipse project">
+    <property name="eclipse.build.dir" value="build/eclipse"/>
+    <taskdef name="eclipse" classname="prantl.ant.eclipse.EclipseTask" classpathref="build.classpath"/>
+    <eclipse mode="java" updatealways="true">
+      <project name="${ant.project.name}"/>
+      <classpath>
+        <source path="${test.src.dir}" output="${eclipse.build.dir}/test"/>
+        <source path="${main.src.dir}" output="${eclipse.build.dir}/main"/>
+        <source path="${metadata.src.dir}/java" output="${eclipse.build.dir}/META-INF"/>
+        <source path="${metadata.src.dir}/web" output="${eclipse.build.dir}/WEB-INF"/>
+        <library pathref="compile.classpath"/>
+      </classpath>
+    </eclipse>
+  </target>
+
+  <target name="-eclipse-clean" depends="set-properties" extensionOf="remove-generated">
+    <delete file="${eclipse.tarball}"/>
+    <delete dir="${basedir}">
+      <include name=".classpath"/>
+      <include name=".project"/>
+    </delete>
+  </target>
+
+</project>

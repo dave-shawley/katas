@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!-- vim: set filetype=ant tabstop=2 shiftwidth=2 expandtab: -->
+<project>
+
+  <target name="-java-properties" depends="-set-project-properties" extensionOf="set-properties">
+    <property name="java.source" value="1.6"/>
+    <property name="java.target" value="${java.source}"/>
+    <property name="main.src.dir" value="${src.dir}/main"/>
+    <property name="main.classes.dir" value="${classes.dir}/main"/>
+    <property name="jar.name" value="${ant.project.name}.jar"/>
+    <property name="jar.path" value="${output.dir}/${jar.name}"/>
+  </target>
+
+  <target name="compile" depends="ready-to-build">
+    <mkdir dir="${main.classes.dir}"/>
+    <javac source="${java.source}" target="${java.target}"
+      srcdir="${main.src.dir}" destdir="${main.classes.dir}"
+      classpathref="compile.classpath"
+      debug="true" includeantruntime="false"/>
+  </target>
+
+  <target name="build-jar" depends="compile">
+    <mkdir dir="${output.dir}"/>
+    <jar destfile="${jar.path}">
+      <fileset dir="${main.classes.dir}"/>
+    </jar>
+  </target>
+
+  <target name="javadoc" depends="compile" description="generate API javadocs">
+    <javadoc destdir="${output.dir}/api" source="${java.source}"
+      sourcepath="${main.src.dir}">
+      <classpath>
+        <pathelement location="${main.classes.dir}"/>
+        <fileset dir="${ivy.lib.dir}"/>
+      </classpath>
+      <link href="http://docs.oracle.com/javase/6/docs/api/" />
+      <link href="http://logging.apache.org/log4j/1.2/apidocs/" />
+    </javadoc>
+  </target>
+
+</project>

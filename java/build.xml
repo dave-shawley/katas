@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!-- vim: set filetype=ant tabstop=2 shiftwidth=2 expandtab: -->
+<project name="java-katas" default="test">
+  <extension-point name="set-properties"/>
+  <extension-point name="remove-intermediate"/>
+  <extension-point name="remove-generated"/>
+  <extension-point name="ready-to-build" depends="set-properties"/>
+  <extension-point name="ready-to-test"/>
+
+  <!-- these are pseudo-targets so they have descriptions -->
+  <extension-point name="coverage"
+    description="generate unit test coverage reports"/>
+  <extension-point name="package"
+    description="build the distribution package"/>
+
+  <!-- need to override this globally -->
+  <property name="ant.src.dir" location="src/ant"/>
+
+  <import file="${ant.src.dir}/eclipse.xml"/>
+  <import file="${ant.src.dir}/ivy.xml"/>
+  <import file="${ant.src.dir}/cobertura.xml"/>
+  <import file="${ant.src.dir}/java.xml"/>
+  <import file="${ant.src.dir}/junit.xml"/>
+
+
+  <target name="-set-project-properties" extensionOf="set-properties">
+    <!-- set the basic properties -->
+    <property name="src.dir" location="src"/>
+    <property name="build.dir" location="build"/>
+    <property name="build.lib.dir" value="${build.dir}/ant-lib"/>
+    <property name="classes.dir" value="build/classes"/>
+    <property name="output.dir" location="output"/>
+    <property name="metadata.src.dir" value="${src.dir}/metadata"/>
+    <property name="main.src.dir" value="${src.dir}"/>
+    <property name="test.src.dir" value="${src.dir}"/>
+    <property name="test.report.dir" value="${build.dir}/reports/test"/>
+    <path id="build.classpath" cache="no">
+      <fileset dir="${build.lib.dir}"/>
+    </path>
+  </target>
+
+  <target name="clean" depends="set-properties, remove-intermediate"
+    description="remove intermediate objects">
+    <delete dir="${classes.dir}" deleteonexit="yes"/>
+  </target>
+
+  <target name="real.clean" depends="clean"
+    description="remove built artifacts">
+    <delete dir="${output.dir}" deleteonexit="yes"/>
+  </target>
+
+  <target name="dist.clean" depends="real.clean, remove-generated"
+    description="remove all intermediate, built, and downloaded objects">
+    <delete dir="${build.dir}" deleteonexit="yes"/>
+  </target>
+
+  <target name="package-jar" depends="build-jar" extensionOf="package"/>
+
+  <target name="reset-tests" depends="set-properties"
+    description="reset test cases to use @Ignore">
+    <replace dir="${test.src.dir}"
+      token="@Test" value="@Ignore @Test"
+      includes="**/*Test.java, **/*Tests.java"/>
+  </target>
+
+</project>

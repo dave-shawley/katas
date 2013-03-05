@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!-- vim: set filetype=ant tabstop=2 shiftwidth=2 expandtab: -->
+<project>
+
+  <target name="-junit-properties" extensionOf="set-properties"
+    depends="-set-project-properties">
+    <!-- set the properties related to testing -->
+    <property name="test.src.dir" value="${src.dir}/test"
+      description="this is where the test sources live"/>
+    <property name="test.classes.dir" value="${classes.dir}/test"
+      description="this is where the test source code is compiled to"/>
+    <property name="test.data.dir" value="${build.dir}/test"
+      description="this is where test data files live"/>
+    <property name="test.report.dir" value="${output.dir}/reports/test"
+      description="this is where the reports are written to"/>
+    <property name="coverage.dir" value="${build.dir}/coverage"
+      description="this is where the coverage data lives"/>
+  </target>
+
+  <target name="test" depends="ready-to-test"
+    description="compile and run the test suite">
+    <mkdir dir="${test.data.dir}"/>
+    <junit forkmode="once" showoutput="no" printsummary="no" failureproperty="tests.failed">
+      <formatter type="brief" usefile="no"/>
+      <formatter type="xml" unless="test.case"/>
+      <classpath refid="run.test.classpath"/>
+      <test name="${test.case}" if="test.case"/>
+      <batchtest todir="${test.data.dir}" unless="test.case">
+        <fileset dir="${test.src.dir}" includes="**/*Test.java"/>
+        <fileset dir="${test.src.dir}" includes="**/*Tests.java"/>
+      </batchtest>
+    </junit>
+    <mkdir dir="${test.report.dir}"/>
+    <junitreport todir="${test.report.dir}">
+      <fileset dir="${test.data.dir}"/>
+      <report format="frames" todir="${test.report.dir}"/>
+    </junitreport>
+    <fail if="tests.failed">Unit tests have failed, check report in ${test.report.dir}</fail>
+    <echo message="unit test results in ${test.report.dir}"/>
+  </target>
+
+  <target name="-compile-tests" depends="compile" extensionOf="ready-to-test">
+    <mkdir dir="${test.classes.dir}"/>
+    <javac source="${java.source}" target="${java.target}"
+      srcdir="${test.src.dir}" destdir="${test.classes.dir}"
+      debug="true" includeantruntime="false">
+      <classpath id="compile.test.classpath">
+        <pathelement path="${main.classes.dir}"/>
+        <path refid="compile.classpath"/>
+      </classpath>
+    </javac>
+    <path id="run.test.classpath">
+      <pathelement path="${test.classes.dir}"/>
+      <pathelement path="${test.src.dir}"/>
+      <path refid="compile.test.classpath"/>
+    </path>
+  </target>
+
+  <target name="remove-test-output" depends="set-properties" extensionOf="remove-intermediate">
+    <delete dir="${test.data.dir}" deleteonexit="yes"/>
+  </target>
+
+</project>
+

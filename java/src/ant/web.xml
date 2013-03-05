@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!-- vim: set filetype=ant tabstop=2 shiftwidth=2 expandtab: -->
+<project xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <target name="-web-properties" depends="-set-project-properties" extensionOf="set-properties">
+    <property name="web.src.dir" value="${metadata.src.dir}/web"/>
+    <property name="web.classes.dir" value="${classes.dir}/web"/>
+    <property name="war.name" value="${ant.project.name}"/>
+    <path id="compile.web.classpath">
+      <path refid="compile.classpath"/>
+      <pathelement location="${main.classes.dir}"/>
+    </path>
+  </target>
+
+  <target name="compile.web" depends="ready-to-build, compile">
+    <mkdir dir="${web.classes.dir}"/>
+    <javac source="${java.source}" target="${java.target}"
+      srcdir="${web.src.dir}" destdir="${web.classes.dir}"
+      classpathref="compile.classpath"
+      debug="true" includeantruntime="false"/>
+  </target>
+
+  <target name="build-war" depends="compile.web">
+    <property name="web.staging.dir" value="${build.dir}/web-libs"/>
+    <mkdir dir="${web.staging.dir}"/>
+    <ivy:cachefileset setid="web.cache.fileset" conf="runtime" type="jar"/>
+    <copy todir="${web.staging.dir}">
+      <fileset refid="web.cache.fileset"/>
+      <flattenmapper/>
+    </copy>
+    <mkdir dir="${output.dir}/web"/>
+    <war destfile="${output.dir}/web/${war.name}-jboss5.war">
+      <webinf dir="${web.src.dir}/jboss5"/>
+      <lib dir="${web.staging.dir}"/>
+      <classes dir="${main.classes.dir}"/>
+      <classes dir="${web.classes.dir}"/>
+    </war>
+    <war destfile="${output.dir}/web/${war.name}-ee6.war">
+      <webinf dir="${web.src.dir}/ee6"/>
+      <lib dir="${web.staging.dir}">
+        <exclude name="resteasy-*"/>
+        <exclude name="scannotation-*"/>
+      </lib>
+      <classes dir="${main.classes.dir}"/>
+      <classes dir="${web.classes.dir}"/>
+    </war>
+    <delete dir="${web.staging.dir}" deleteonexit="true"/>
+  </target>
+
+</project>
+

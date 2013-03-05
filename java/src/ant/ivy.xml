@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!-- vim: set filetype=ant tabstop=2 shiftwidth=2 expandtab: -->
+<project xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <target name="-ivy-properties" depends="-set-project-properties" extensionOf="set-properties">
+    <property name="ivy.install.version" value="2.2.0"/>
+    <property name="ivy.installed.jar" value="${build.lib.dir}/ivy-${ivy.install.version}.jar"/>
+  </target>
+
+  <condition property="ivy.available">
+    <available classname="org.apache.ivy.Ivy"/>
+  </condition>
+
+  <target name="-install-ivy" depends="set-properties" unless="ivy.available">
+    <!-- install Ivy from maven.org if necessary -->
+    <mkdir dir="${build.lib.dir}"/>
+    <get
+      src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+      dest="${ivy.installed.jar}"
+      usetimestamp="yes"/>
+    <taskdef
+      uri="antlib:org.apache.ivy.ant"
+      resource="org/apache/ivy/ant/antlib.xml"
+      classpathref="build.classpath"/>
+    <property name="ivy.available" value="yes"/>
+  </target>
+
+  <target name="-configure-ivy" depends="-install-ivy" unless="ivy.configured">
+    <ivy:configure/>
+    <path id="compile.classpath" cache="no">
+      <fileset dir="${ivy.lib.dir}"/>
+    </path>
+    <property name="ivy.configured" value="yes"/>
+  </target>
+
+  <target name="resolve" depends="set-properties, -configure-ivy" unless="ivy.resolved" extensionOf="ready-to-build">
+    <ivy:retrieve type="jar"/>
+    <property name="ivy.resolved" value="yes"/>
+  </target>
+
+  <target name="ivy-clean" depends="set-properties, -configure-ivy" extensionOf="remove-generated">
+    <property name="ivy.lib.dir" location="lib"/>
+    <delete dir="${ivy.lib.dir}" deleteonexit="yes"/>
+  </target>
+
+  <target name="dependency.report" depends="resolve">
+    <property name="ivy.report.dir" value="${output.dir}/dependencies"/>
+    <mkdir dir="${ivy.report.dir}"/>
+    <ivy:report todir="${ivy.report.dir}"/>
+  </target>
+
+</project>
