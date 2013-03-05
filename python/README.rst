@@ -1,4 +1,3 @@
-============
 Coding Katas
 ============
 
@@ -9,20 +8,48 @@ in coding quite similar to Katas in martial arts.  I am not an
 expert in martial arts but that is the supposed theory behind their
 discovery by the XP community.
 
-*************************
 Preparing the Environment
 *************************
 
 The easiest way to work with the katas is to install a virtual python
 environment and work within it.  The code should work with either Python
 2.7 or newer.  I have tested it with both 2.7 and 3.2 virtual environments.
+The following sections describe the easiest way to set up a good environment
+under different Python versions.
 
-1. Install `virtualenv`_
-2. Install the testing environment with ``pip install -r requirements.txt``
-3. Run all of the tests with ``nosetests`` or a specific test by naming it
-   as a parameter to ``nosetests``.
+If you are using a Python older than 3.3, then download the most recent
+version of ``virtualenv`` from
+`PyPI <https://pypi.python.org/packages/source/v/virtualenv/>`_ and extract it
+into the current directory.  The following sections refer to the new directory
+as *VENVDIR*.
 
-***************
+Python 2.7
+----------
+::
+
+  prompt$ python2.7 VENVDIR/virtualenv.py --no-site-packages env-2.7
+  prompt$ source env-2.7/bin/activate
+  (env-2.7)prompt$ pip install -r requirements.txt
+
+Python 3.2
+----------
+::
+
+  prompt$ python3.2 VENVDIR/virtualenv.py --no-site-packages env-3.2
+  prompt$ source env-3.2/bin/activate
+  (env-3.2)prompt$ pip install -r requirements.txt
+
+Python 3.3
+----------
+::
+
+  prompt$ pyvenv-3.3 env-3.3
+  prompt$ source env-3.3/bin/activate
+  (env-3.3) prompt$ curl http://python-distribute.org/distribute_setup.py | python
+  (env-3.3) prompt$ curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+  (env-3.3) prompt$ pip install -r requirements.txt
+
+
 Using the Katas
 ***************
 
@@ -41,3 +68,4 @@ the test *go green*.
 .. _virtualenv: http://www.virtualenv.org/
 
 .. vim: set filetype=rst textwidth=78 tabstop=3 expandtab:
+
